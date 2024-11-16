@@ -1,13 +1,13 @@
-import React from 'react';
-import styled from 'styled-components/macro';
+import React from "react";
+import styled from "styled-components/macro";
 
-import { QUERIES, WEIGHTS } from '../../constants';
-import Logo from '../Logo';
-import Icon from '../Icon';
-import UnstyledButton from '../UnstyledButton';
-import SuperHeader from '../SuperHeader';
-import MobileMenu from '../MobileMenu';
-import VisuallyHidden from '../VisuallyHidden';
+import { QUERIES, WEIGHTS } from "../../constants";
+import Logo from "../Logo";
+import Icon from "../Icon";
+import UnstyledButton from "../UnstyledButton";
+import SuperHeader from "../SuperHeader";
+import MobileMenu from "../MobileMenu";
+import VisuallyHidden from "../VisuallyHidden";
 
 const Header = () => {
   const [showMobileMenu, setShowMobileMenu] = React.useState(false);
@@ -20,12 +20,26 @@ const Header = () => {
           <Logo />
         </LogoWrapper>
         <DesktopNav>
-          <NavLink href="/sale">Sale</NavLink>
-          <NavLink href="/new">New&nbsp;Releases</NavLink>
-          <NavLink href="/men">Men</NavLink>
-          <NavLink href="/women">Women</NavLink>
-          <NavLink href="/kids">Kids</NavLink>
-          <NavLink href="/collections">Collections</NavLink>
+          <NavLink href="/sale">
+            <NavLinkName data-hover="Sale">Sale</NavLinkName>
+          </NavLink>
+          <NavLink href="/new">
+            <NavLinkName data-hover="New&nbsp;Releases">
+              New&nbsp;Releases
+            </NavLinkName>
+          </NavLink>
+          <NavLink href="/men">
+            <NavLinkName data-hover="Men">Men</NavLinkName>
+          </NavLink>
+          <NavLink href="/women">
+            <NavLinkName data-hover="Women">Women</NavLinkName>
+          </NavLink>
+          <NavLink href="/kids">
+            <NavLinkName data-hover="Kids">Kids</NavLinkName>
+          </NavLink>
+          <NavLink href="/collections">
+            <NavLinkName data-hover="Collections">Collections</NavLinkName>
+          </NavLink>
         </DesktopNav>
         <MobileActions>
           <ShoppingBagButton>
@@ -114,15 +128,35 @@ const Filler = styled.div`
   }
 `;
 
+const NavLinkName = styled.span`
+  position: relative;
+  display: inline-block;
+  transition: transform 300ms;
+
+  &::before {
+    position: absolute;
+    content: attr(data-hover);
+    top: 100%;
+    font-weight: ${WEIGHTS.bold};
+  }
+`;
+
 const NavLink = styled.a`
+  position: relative;
   font-size: 1.125rem;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--color-gray-900);
   font-weight: ${WEIGHTS.medium};
+  padding: 0 4px;
+  overflow: hidden;
 
   &:first-of-type {
     color: var(--color-secondary);
+  }
+
+  &:hover ${NavLinkName} {
+    transform: translateY(-100%);
   }
 `;
 
