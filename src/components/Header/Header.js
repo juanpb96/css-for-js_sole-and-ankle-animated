@@ -156,7 +156,12 @@ const NavLink = styled.a`
   }
 
   &:hover ${NavLinkName} {
-    transform: translateY(-100%);
+    opacity: 0.75;
+
+    @media (prefers-reduced-motion: no-preference) {
+      opacity: revert;
+      transform: translateY(-100%);
+    }
   }
 `;
 
