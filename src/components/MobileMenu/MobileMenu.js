@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
-import styled, { keyframes } from "styled-components/macro";
+import React, { useState } from "react";
+import styled, { css, keyframes } from "styled-components/macro";
 import { DialogOverlay, DialogContent } from "@reach/dialog";
 
 import { QUERIES, WEIGHTS } from "../../constants";
@@ -10,10 +10,33 @@ import Icon from "../Icon";
 import VisuallyHidden from "../VisuallyHidden";
 
 const MobileMenu = ({ isOpen, onDismiss }) => {
+  const [showExitAnimation, setShowExitAnimation] = useState(false);
+  const animationsTotal = 3;
+  let counter = 0;
+
+  const onOverlayDismiss = () => {
+    setShowExitAnimation(true);
+  };
+
+  const onAnimationEnd = () => {
+    counter += 1;
+
+    if (showExitAnimation && counter === animationsTotal) {
+      setShowExitAnimation(false);
+      onDismiss();
+      counter = 0;
+    }
+  };
+
   return (
-    <Overlay isOpen={isOpen} onDismiss={onDismiss}>
-      <Content aria-label="Menu">
-        <CloseButton onClick={onDismiss}>
+    <Overlay
+      isOpen={isOpen}
+      onDismiss={onOverlayDismiss}
+      $close={showExitAnimation}
+      onAnimationEnd={onAnimationEnd}
+    >
+      <Content aria-label="Menu" $close={showExitAnimation}>
+        <CloseButton onClick={onOverlayDismiss}>
           <Icon id="close" />
           <VisuallyHidden>Dismiss menu</VisuallyHidden>
         </CloseButton>
@@ -40,16 +63,31 @@ const fadeIn = keyframes`
   from {
     opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
 `;
 
 const fadeOut = keyframes`
   from {
     opacity: 1;
   }
+  to {
+    opacity: 0;
+  }
 `;
 
 const slideIn = keyframes`
   from {
+    transform: translateX(100%);
+  }
+`;
+
+const slideOut = keyframes`
+  from {
+    transform: translateX(0);
+  }
+  to {
     transform: translateX(100%);
   }
 `;
@@ -63,10 +101,18 @@ const Overlay = styled(DialogOverlay)`
   background: var(--color-backdrop);
   display: flex;
   justify-content: flex-end;
-  animation: ${fadeIn} 200ms ease-out;
+  ${(props) =>
+    props.$close
+      ? css`
+          animation: ${fadeOut} 300ms ease-in both;
+          animation-delay: 600ms;
+        `
+      : css`
+          animation: ${fadeIn} 200ms ease-out both;
+        `};
 `;
 
-// TODO: Check exit animation and stretch goal
+// TODO: Continue working on stretch goal
 const Content = styled(DialogContent)`
   position: relative;
   background: white;
@@ -75,8 +121,17 @@ const Content = styled(DialogContent)`
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  animation: ${slideIn} 200ms ease-out both;
-  animation-delay: 200ms;
+
+  ${(props) =>
+    props.$close
+      ? css`
+          animation: ${slideOut} 200ms ease-in both;
+          animation-delay: 300ms;
+        `
+      : css`
+          animation: ${slideIn} 200ms ease-out both;
+          animation-delay: 200ms;
+        `}
 
   &::before {
     pointer-events: none;
@@ -84,9 +139,15 @@ const Content = styled(DialogContent)`
     position: absolute;
     inset: 0;
     background-color: white;
-    opacity: 0;
-    animation: ${fadeOut} 200ms ease-out both;
-    animation-delay: 400ms;
+    ${(props) =>
+      props.$close
+        ? css`
+            animation: ${fadeIn} 200ms ease-in both;
+          `
+        : css`
+            animation: ${fadeOut} 200ms ease-out both;
+            animation-delay: 400ms;
+          `}
   }
 `;
 
