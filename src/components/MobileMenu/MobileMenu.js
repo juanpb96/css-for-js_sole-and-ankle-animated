@@ -9,8 +9,24 @@ import UnstyledButton from "../UnstyledButton";
 import Icon from "../Icon";
 import VisuallyHidden from "../VisuallyHidden";
 
+const navLinks = [
+  { link: "/sale", label: "Sale" },
+  { link: "/new", label: <>New&nbsp;Releases</> },
+  { link: "/men", label: "Men" },
+  { link: "/women", label: "Women" },
+  { link: "/kids", label: "Kids" },
+  { link: "/collections", label: "Collections" },
+];
+
+const footerLinks = [
+  { link: "/terms", label: "Terms and Conditions" },
+  { link: "/privacy", label: "Privacy Policy" },
+  { link: "/contact", label: "Contact Us" },
+];
+
 const MobileMenu = ({ isOpen, onDismiss }) => {
   const [showExitAnimation, setShowExitAnimation] = useState(false);
+  const enableInitialAnimation = false; // Initial goal animation
   const animationsTotal = 3;
   let counter = 0;
 
@@ -35,24 +51,41 @@ const MobileMenu = ({ isOpen, onDismiss }) => {
       $close={showExitAnimation}
       onAnimationEnd={onAnimationEnd}
     >
-      <Content aria-label="Menu" $close={showExitAnimation}>
+      <Content
+        aria-label="Menu"
+        $initial={enableInitialAnimation}
+        $close={showExitAnimation}
+      >
         <CloseButton onClick={onOverlayDismiss}>
           <Icon id="close" />
           <VisuallyHidden>Dismiss menu</VisuallyHidden>
         </CloseButton>
         <Filler />
         <Nav>
-          <NavLink href="/sale">Sale</NavLink>
-          <NavLink href="/new">New&nbsp;Releases</NavLink>
-          <NavLink href="/men">Men</NavLink>
-          <NavLink href="/women">Women</NavLink>
-          <NavLink href="/kids">Kids</NavLink>
-          <NavLink href="/collections">Collections</NavLink>
+          {navLinks.map((navItem, index) => (
+            <NavLink
+              key={navItem.label}
+              $initial={enableInitialAnimation}
+              $delayOrder={index}
+              $close={showExitAnimation}
+              href={navItem.link}
+            >
+              {navItem.label}
+            </NavLink>
+          ))}
         </Nav>
         <Footer>
-          <SubLink href="/terms">Terms and Conditions</SubLink>
-          <SubLink href="/privacy">Privacy Policy</SubLink>
-          <SubLink href="/contact">Contact Us</SubLink>
+          {footerLinks.map((navItem, index) => (
+            <SubLink
+              key={navItem.label}
+              $initial={enableInitialAnimation}
+              $delayOrder={navLinks.length + index}
+              $close={showExitAnimation}
+              href={navItem.link}
+            >
+              {navItem.label}
+            </SubLink>
+          ))}
         </Footer>
       </Content>
     </Overlay>
@@ -92,6 +125,15 @@ const slideOut = keyframes`
   }
 `;
 
+const doorClose = keyframes`
+  from {
+    transform: rotateY(-90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+`;
+
 const Overlay = styled(DialogOverlay)`
   position: fixed;
   top: 0;
@@ -101,6 +143,8 @@ const Overlay = styled(DialogOverlay)`
   background: var(--color-backdrop);
   display: flex;
   justify-content: flex-end;
+  perspective: 900px;
+
   ${(props) =>
     props.$close
       ? css`
@@ -112,7 +156,6 @@ const Overlay = styled(DialogOverlay)`
         `};
 `;
 
-// TODO: Continue working on stretch goal
 const Content = styled(DialogContent)`
   position: relative;
   background: white;
@@ -122,8 +165,10 @@ const Content = styled(DialogContent)`
   display: flex;
   flex-direction: column;
 
+  // Initial goal animation
   ${(props) =>
-    props.$close
+    props.$initial &&
+    (props.$close
       ? css`
           animation: ${slideOut} 200ms ease-in both;
           animation-delay: 300ms;
@@ -131,7 +176,21 @@ const Content = styled(DialogContent)`
       : css`
           animation: ${slideIn} 200ms ease-out both;
           animation-delay: 200ms;
-        `}
+        `)}
+
+  // Stretch goal animation
+  ${(props) =>
+    !props.$initial &&
+    (props.$close
+      ? css`
+          animation: ${slideOut} 200ms ease-in both;
+          animation-delay: 300ms;
+        `
+      : css`
+          transform-origin: right center;
+          animation: ${doorClose} 500ms ease-out both alternate;
+          animation-delay: 200ms;
+        `)}
 
   &::before {
     pointer-events: none;
@@ -139,6 +198,7 @@ const Content = styled(DialogContent)`
     position: absolute;
     inset: 0;
     background-color: white;
+
     ${(props) =>
       props.$close
         ? css`
@@ -147,7 +207,7 @@ const Content = styled(DialogContent)`
         : css`
             animation: ${fadeOut} 200ms ease-out both;
             animation-delay: 400ms;
-          `}
+          `};
   }
 `;
 
@@ -164,12 +224,28 @@ const Nav = styled.nav`
   gap: 16px;
 `;
 
+const slideInToVisible = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(30%);
+  }
+`;
+
 const NavLink = styled.a`
   color: var(--color-gray-900);
   font-weight: ${WEIGHTS.medium};
   text-decoration: none;
   font-size: 1.125rem;
   text-transform: uppercase;
+  display: inline-block;
+
+  ${(props) =>
+    !props.$initial &&
+    css`
+      animation: ${slideInToVisible} 300ms ease-out both;
+      animation-delay: calc(600ms + (200ms * ${props.$delayOrder}));
+      animation-play-state: ${props.$close ? "paused" : "running"};
+    `};
 
   &:first-of-type {
     color: var(--color-secondary);
@@ -191,6 +267,14 @@ const SubLink = styled.a`
   color: var(--color-gray-700);
   font-size: 0.875rem;
   text-decoration: none;
+
+  ${(props) =>
+    !props.$initial &&
+    css`
+      animation: ${slideInToVisible} 300ms ease-out both;
+      animation-delay: calc(600ms + (200ms * ${props.$delayOrder}));
+      animation-play-state: ${props.$close ? "paused" : "running"};
+    `};
 `;
 
 export default MobileMenu;
